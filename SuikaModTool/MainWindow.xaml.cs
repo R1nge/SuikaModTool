@@ -1,7 +1,11 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 
@@ -13,12 +17,43 @@ public partial class MainWindow : Window
     private GameConfig _configWithFullPathToCopyFilesFrom = new();
     private GameConfig _configToSave = new();
     private string _savePath = null;
+    public ObservableCollection<MyPathData> Paths { get; set; }
+
+    public class MyPathData : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler? PropertyChanged;
+        public MyPathData(string path)
+        {
+            Path = path;
+        }
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
+        }
+        
+        public string Path { get; set; }
+    }
 
     //TODO: load data from already existing mod
 
     public MainWindow()
     {
         InitializeComponent();
+
+        Paths = new ObservableCollection<MyPathData>()
+        {
+            new MyPathData("Test1"),
+            new MyPathData("Test2")
+        };
     }
 
     private void TitleChanged(object sender, TextChangedEventArgs args)
@@ -140,7 +175,7 @@ public partial class MainWindow : Window
         };
 
         imageDialog = dialog;
-        
+
         bool? result = dialog.ShowDialog();
 
         return result;
@@ -168,8 +203,7 @@ public partial class MainWindow : Window
     {
         var fullIconPath = Path.Combine(fullSavePath, _configToSave.ModIconPath);
         File.Copy(_configWithFullPathToCopyFilesFrom.ModIconPath, fullIconPath, true);
-        
-        
+
         var fullContainerPath = Path.Combine(fullSavePath, _configToSave.ContainerImagePath);
         File.Copy(_configWithFullPathToCopyFilesFrom.ContainerImagePath, fullContainerPath, true);
     }
