@@ -9,18 +9,21 @@ namespace SuikaModTool;
 
 public partial class MainWindow : Window
 {
+    private GameConfig _configWithFullPathToCopyFilesFrom = new();
     private GameConfig _configToSave = new();
     private string _savePath = null;
-    
+
+    //TODO: load data from already existing mod
+
     public MainWindow()
     {
         InitializeComponent();
     }
-    
+
     private void TitleChanged(object sender, TextChangedEventArgs args)
     {
-        _configToSave.ModName = ((TextBox) sender).Text;
-        Debug.WriteLine($"Title has changed to: {((TextBox) sender).Text}");
+        _configWithFullPathToCopyFilesFrom.ModName = ((TextBox)sender).Text;
+        _configToSave.ModName = ((TextBox)sender).Text;
     }
 
     private void SelectPreviewImageClicked(object sender, RoutedEventArgs e)
@@ -31,15 +34,13 @@ public partial class MainWindow : Window
             DefaultExt = ".jpg",
             Filter = "Image Files(*.jpg;*.jpeg;*.bmp)|*.jpg;*.jpeg;.bmp;"
         };
-        
+
         bool? result = dialog.ShowDialog();
-        
+
         if (result == true)
         {
-            //TODO: append save file directory
-            var path = dialog.SafeFileName;//Path.GetDirectoryName(dialog.FileName)!;;
-            _configToSave.ModIconPath = path;
-            Debug.WriteLine($"File Path: {path}");
+            _configWithFullPathToCopyFilesFrom.ModIconPath = dialog.FileName;
+            _configToSave.ModIconPath = dialog.SafeFileName;
         }
     }
 
@@ -48,10 +49,10 @@ public partial class MainWindow : Window
         ShowSaveFileDialog();
         if (Validate())
         {
-            CreateMod();    
+            CreateMod();
         }
     }
-    
+
     private void ShowSaveFileDialog()
     {
         string dummyFileName = "Save Here";
@@ -71,6 +72,18 @@ public partial class MainWindow : Window
 
     private bool Validate()
     {
+        if (string.IsNullOrEmpty(_configToSave.ModName) || string.IsNullOrWhiteSpace(_configToSave.ModName))
+        {
+            MessageBox.Show("Mod name is empty", "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+            return false;
+        }
+
+        if (string.IsNullOrEmpty(_configToSave.ModIconPath) || string.IsNullOrWhiteSpace(_configToSave.ModIconPath))
+        {
+            MessageBox.Show("Mod icon path is empty", "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+            return false;
+        }
+
         return true;
     }
 
@@ -85,8 +98,16 @@ public partial class MainWindow : Window
         }
 
         var fullJsonPath = Path.Combine(fullSavePath, "config.json");
-        
         File.WriteAllText(fullJsonPath, json);
+        
+        CopyFiles(fullSavePath);
+        
         Debug.WriteLine("Mod has been created");
+    }
+
+    private void CopyFiles(string fullSavePath)
+    {
+        var fullIconPath = Path.Combine(fullSavePath, _configToSave.ModIconPath);
+        File.Copy(_configWithFullPathToCopyFilesFrom.ModIconPath, fullIconPath);
     }
 }
