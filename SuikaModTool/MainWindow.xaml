@@ -6,17 +6,26 @@
         xmlns:local="clr-namespace:SuikaModTool"
         mc:Ignorable="d"
         ResizeMode="NoResize"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="600">
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
         
-        <Label Content="Mod Title" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10"/>
-        <TextBox TextChanged="TitleChanged" Grid.Row="0" Grid.Column="1" Margin="10" Width="200"/>
-        
-        <Button Content="Create" Grid.Row="2" HorizontalAlignment="Center" Margin="10"/>
+        <Label Content="Mod title"/>
+        <TextBox Grid.Row="0" Grid.Column="1" TextChanged="TitleChanged" Margin="2"/>
+        <Button Grid.Row="1" Grid.Column="1" Click="SelectPreviewImageClicked"/>
+        <Button x:Name="CreateModButton" Content="Create" Grid.Row="2" Grid.ColumnSpan="3" Grid.Column="0" Click="CreateModClicked"/>
+      
+
     </Grid>
+
 </Window>
