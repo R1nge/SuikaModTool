@@ -18,6 +18,7 @@ public partial class MainWindow : Window
     private string _savePath = null;
     public ObservableCollection<MyPathData> SuikaSkinsPaths { get; set; }
     public ObservableCollection<MyPathData> SuikaIconsPaths { get; set; }
+    public ObservableCollection<MyPathData> SuikaAudioPaths { get; set; }
 
     public class MyPathData : INotifyPropertyChanged
     {
@@ -52,6 +53,7 @@ public partial class MainWindow : Window
 
         SuikaSkinsPaths = new ObservableCollection<MyPathData>();
         SuikaIconsPaths = new ObservableCollection<MyPathData>();
+        SuikaAudioPaths = new ObservableCollection<MyPathData>();
     }
 
     private void TitleChanged(object sender, TextChangedEventArgs args)
@@ -95,7 +97,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (OpenMultipleFilesDialog(out var dialog) == true)
+        if (OpenMultipleFilesDialogImages(out var dialog) == true)
         {
             _configToSave.SuikaSkinsImagesPaths = new string[_suikaCount];
             _configWithFullPathToCopyFilesFrom.SuikaSkinsImagesPaths = new string[_suikaCount];
@@ -129,7 +131,7 @@ public partial class MainWindow : Window
     {
         SelectSuikaIcons();
     }
-    
+
     private void SelectSuikaIcons()
     {
         if (SuikaIconsPaths.Count == _suikaCount)
@@ -138,7 +140,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (OpenMultipleFilesDialog(out var dialog) == true)
+        if (OpenMultipleFilesDialogImages(out var dialog) == true)
         {
             _configToSave.SuikaIconsPaths = new string[_suikaCount];
             _configWithFullPathToCopyFilesFrom.SuikaIconsPaths = new string[_suikaCount];
@@ -165,7 +167,50 @@ public partial class MainWindow : Window
             {
                 SuikaIconsPaths.Add(new MyPathData($"{SuikaIconsPaths.Count + 1} " + dialog.FileNames[i]));
             }
-        }   
+        }
+    }
+
+    private void SelectAudioClicked(object sender, RoutedEventArgs e)
+    {
+        SelectAudio();
+    }
+
+    private void SelectAudio()
+    {
+        if (SuikaAudioPaths.Count == _suikaCount)
+        {
+            MessageBox.Show("Max number of audio reached");
+            return;
+        }
+
+        if (OpenMultipleFilesDialogAudio(out var dialog) == true)
+        {
+            _configToSave.SuikaAudioPaths = new string[_suikaCount];
+            _configWithFullPathToCopyFilesFrom.SuikaAudioPaths = new string[_suikaCount];
+
+            for (var i = 0; i < dialog.SafeFileNames.Length; i++)
+            {
+                var fileName = dialog.SafeFileNames[i];
+                if (i < _suikaCount)
+                {
+                    _configToSave.SuikaAudioPaths[i] = fileName;
+                }
+            }
+
+            for (int i = 0; i < dialog.FileNames.Length; i++)
+            {
+                var fileName = dialog.FileNames[i];
+                if (i < _suikaCount)
+                {
+                    _configWithFullPathToCopyFilesFrom.SuikaAudioPaths[i] = fileName;
+                }
+            }
+
+            for (int i = 0; i < dialog.FileNames.Length; i++)
+            {
+                SuikaAudioPaths.Add(new MyPathData($"{SuikaAudioPaths.Count + 1} " + dialog.FileNames[i]));
+            }
+        }
     }
 
     private void CreateModClicked(object sender, RoutedEventArgs e)
@@ -177,13 +222,30 @@ public partial class MainWindow : Window
         }
     }
 
-    private bool? OpenMultipleFilesDialog(out OpenFileDialog imageDialog)
+    private bool? OpenMultipleFilesDialogImages(out OpenFileDialog imageDialog)
     {
         var dialog = new OpenFileDialog
         {
             FileName = "Preview Image",
             DefaultExt = ".jpg",
             Filter = "Image Files(*.jpg;*.jpeg;*.bmp;*.png)|*.jpg;*.jpeg;*.bmp;*.png",
+            Multiselect = true
+        };
+
+        imageDialog = dialog;
+
+        bool? result = dialog.ShowDialog();
+
+        return result;
+    }
+
+    private bool? OpenMultipleFilesDialogAudio(out OpenFileDialog imageDialog)
+    {
+        var dialog = new OpenFileDialog
+        {
+            FileName = "Audio",
+            DefaultExt = ".mp3",
+            Filter = "Audio Files(*.mp3)|*.mp3",
             Multiselect = true
         };
 
@@ -221,36 +283,45 @@ public partial class MainWindow : Window
 
         if (StringIsInvalid(_configToSave.ModIconPath))
         {
-            MessageBox.Show("Mod icon path is empty", "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
-            return false;
+            if (!ShowContinueDialog("Mod icon path is empty"))
+            {
+                return false;
+            }
         }
 
         if (StringIsInvalid(_configToSave.ContainerImagePath))
         {
-            MessageBox.Show("Container image path is empty", "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
-            return false;
+            if (!ShowContinueDialog("Container image path is empty"))
+            {
+                return false;
+            }
         }
 
         if (_configToSave.SuikaSkinsImagesPaths.Length != _suikaCount)
         {
-            MessageBox.Show("Suika skins images paths are empty", "Save error", MessageBoxButton.OK,
-                MessageBoxImage.Error);
-            return false;
+            if (!ShowContinueDialog($"Suika skins images paths are less than {_suikaCount}"))
+            {
+                return false;
+            }
         }
 
         if (_configToSave.SuikaIconsPaths.Length != _suikaCount)
         {
-            MessageBox.Show("Suika icons paths are empty", "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
-            return false;
+            if (!ShowContinueDialog($"Suika icons paths are less than {_suikaCount}"))
+            {
+                return false;
+            }
         }
-        
-        return true;
 
         if (_configToSave.SuikaAudioPaths.Length != _suikaCount)
         {
-            MessageBox.Show("Suika audio paths are empty", "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
-            return false;
+            if (!ShowContinueDialog($"Suika audio paths are less than {_suikaCount}"))
+            {
+                return false;
+            }
         }
+
+        return true;
 
         if (_configToSave.SuikaDropChances.Length != _suikaCount)
         {
@@ -264,6 +335,12 @@ public partial class MainWindow : Window
     private bool StringIsInvalid(string str)
     {
         return string.IsNullOrEmpty(str) || string.IsNullOrWhiteSpace(str);
+    }
+
+    private bool ShowContinueDialog(string message)
+    {
+        return MessageBox.Show(message + "\nDo you want to continue?", "Save error", MessageBoxButton.YesNo,
+            MessageBoxImage.Error) == MessageBoxResult.Yes;
     }
 
     private bool? OpenImageFileDialog(out OpenFileDialog imageDialog)
@@ -297,7 +374,8 @@ public partial class MainWindow : Window
 
         CopyFiles(fullSavePath);
 
-        MessageBox.Show($"Mod has been created\n {fullSavePath}", "Save success", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show($"Mod has been created\n {fullSavePath}", "Save success", MessageBoxButton.OK,
+            MessageBoxImage.Information);
     }
 
     private void CopyFiles(string fullSavePath)
@@ -310,14 +388,29 @@ public partial class MainWindow : Window
 
         for (int i = 0; i < _configToSave.SuikaSkinsImagesPaths.Length; i++)
         {
+            if (StringIsInvalid(_configToSave.SuikaSkinsImagesPaths[i]))
+                continue;
+            
             var fullSkinPath = Path.Combine(fullSavePath, _configToSave.SuikaSkinsImagesPaths[i]);
             File.Copy(_configWithFullPathToCopyFilesFrom.SuikaSkinsImagesPaths[i], fullSkinPath, true);
         }
-        
+
         for (int i = 0; i < _configToSave.SuikaIconsPaths.Length; i++)
         {
+            if (StringIsInvalid(_configToSave.SuikaIconsPaths[i]))
+                continue;
+            
             var fullSkinPath = Path.Combine(fullSavePath, _configToSave.SuikaIconsPaths[i]);
             File.Copy(_configWithFullPathToCopyFilesFrom.SuikaIconsPaths[i], fullSkinPath, true);
+        }
+
+        for (int i = 0; i < _configToSave.SuikaAudioPaths.Length; i++)
+        {
+            if(StringIsInvalid(_configToSave.SuikaAudioPaths[i]))
+                continue;
+            
+            var fullSkinPath = Path.Combine(fullSavePath, _configToSave.SuikaAudioPaths[i]);
+            File.Copy(_configWithFullPathToCopyFilesFrom.SuikaAudioPaths[i], fullSkinPath, true);
         }
     }
 }
