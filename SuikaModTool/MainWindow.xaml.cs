@@ -118,7 +118,7 @@ public partial class MainWindow : Window
 
             for (int i = 0; i < dialog.FileNames.Length; i++)
             {
-                Paths.Add(new MyPathData(dialog.FileNames[i]));
+                Paths.Add(new MyPathData($"{Paths.Count + 1} " + dialog.FileNames[i]));
             }
         }
     }

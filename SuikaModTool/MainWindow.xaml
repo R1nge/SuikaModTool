@@ -39,13 +39,16 @@
         
         <Label Grid.Row="3" Grid.Column="0" Content="Suika Skins Icons"/>
         <Button Grid.Row="3" Grid.Column="1" Click="SelectSuikaSkinsClicked" Content="Select" Width="45" HorizontalAlignment="Left"></Button>
-        <ItemsControl Grid.Row="3" Grid.Column="2" Name="SuikaSkinsPathList" ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Paths}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding Path}" />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <ScrollViewer Grid.Row="3" Grid.Column="1" HorizontalScrollBarVisibility="Auto" CanContentScroll="False" Height="30" Margin="45 0 0 0 ">
+            <ItemsControl  Name="SuikaSkinsPathList" ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Paths}" ScrollViewer.CanContentScroll="True">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Path}" TextWrapping="Wrap"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        
         
         <Button x:Name="CreateModButton" Content="Create" Grid.Row="12" Grid.ColumnSpan="3" Grid.Column="0" Click="CreateModClicked"/>
       
