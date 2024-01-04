@@ -5,7 +5,6 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 
@@ -14,14 +13,15 @@ namespace SuikaModTool;
 public partial class MainWindow : Window
 {
     private int _suikaCount = 12;
-    private GameConfig _configWithFullPathToCopyFilesFrom = new();
-    private GameConfig _configToSave = new();
+    private GameConfig _configWithFullPathToCopyFilesFrom;
+    private GameConfig _configToSave;
     private string _savePath = null;
     public ObservableCollection<MyPathData> Paths { get; set; }
 
     public class MyPathData : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
+
         public MyPathData(string path)
         {
             Path = path;
@@ -39,7 +39,7 @@ public partial class MainWindow : Window
             OnPropertyChanged(propertyName);
             return true;
         }
-        
+
         public string Path { get; set; }
     }
 
@@ -49,11 +49,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        Paths = new ObservableCollection<MyPathData>()
-        {
-            new MyPathData("Test1"),
-            new MyPathData("Test2")
-        };
+        Paths = new ObservableCollection<MyPathData>();
     }
 
     private void TitleChanged(object sender, TextChangedEventArgs args)
@@ -84,6 +80,49 @@ public partial class MainWindow : Window
         }
     }
 
+    private void SelectSuikaSkinsClicked(object sender, RoutedEventArgs e)
+    {
+        SelectSuikaSkins();
+    }
+
+    private void SelectSuikaSkins()
+    {
+        if (Paths.Count == _suikaCount)
+        {
+            MessageBox.Show("Max number of suika skins reached");
+            return;
+        }
+
+        if (OpenMultipleFilesDialog(out var dialog) == true)
+        {
+            _configToSave.SuikaSkinsImagesPaths = new string[_suikaCount];
+            _configWithFullPathToCopyFilesFrom.SuikaSkinsImagesPaths = new string[_suikaCount];
+
+            for (var i = 0; i < dialog.SafeFileNames.Length; i++)
+            {
+                var fileName = dialog.SafeFileNames[i];
+                if (i < _suikaCount)
+                {
+                    _configToSave.SuikaSkinsImagesPaths[i] = fileName;
+                }
+            }
+
+            for (int i = 0; i < dialog.FileNames.Length; i++)
+            {
+                var fileName = dialog.FileNames[i];
+                if (i < _suikaCount)
+                {
+                    _configWithFullPathToCopyFilesFrom.SuikaSkinsImagesPaths[i] = fileName;
+                }
+            }
+
+            for (int i = 0; i < dialog.FileNames.Length; i++)
+            {
+                Paths.Add(new MyPathData(dialog.FileNames[i]));
+            }
+        }
+    }
+
     private void CreateModClicked(object sender, RoutedEventArgs e)
     {
         ShowSaveFileDialog();
@@ -91,6 +130,23 @@ public partial class MainWindow : Window
         {
             CreateMod();
         }
+    }
+
+    private bool? OpenMultipleFilesDialog(out OpenFileDialog imageDialog)
+    {
+        var dialog = new OpenFileDialog
+        {
+            FileName = "Preview Image",
+            DefaultExt = ".jpg",
+            Filter = "Image Files(*.jpg;*.jpeg;*.bmp;*.png)|*.jpg;*.jpeg;*.bmp;*.png",
+            Multiselect = true
+        };
+
+        imageDialog = dialog;
+
+        bool? result = dialog.ShowDialog();
+
+        return result;
     }
 
     private void ShowSaveFileDialog()
@@ -139,6 +195,7 @@ public partial class MainWindow : Window
             return false;
         }
 
+
         if (_configToSave.SuikaIconsPaths.Length != _suikaCount)
         {
             MessageBox.Show("Suika icons paths are empty", "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -171,7 +228,7 @@ public partial class MainWindow : Window
         {
             FileName = "Preview Image",
             DefaultExt = ".jpg",
-            Filter = "Image Files(*.jpg;*.jpeg;*.bmp)|*.jpg;*.jpeg;.bmp;"
+            Filter = "Image Files(*.jpg;*.jpeg;*.bmp;*.png)|*.jpg;*.jpeg;*.bmp;*.png",
         };
 
         imageDialog = dialog;
@@ -206,5 +263,11 @@ public partial class MainWindow : Window
 
         var fullContainerPath = Path.Combine(fullSavePath, _configToSave.ContainerImagePath);
         File.Copy(_configWithFullPathToCopyFilesFrom.ContainerImagePath, fullContainerPath, true);
+
+        for (int i = 0; i < _configToSave.SuikaSkinsImagesPaths.Length; i++)
+        {
+            var fullSkinPath = Path.Combine(fullSavePath, _configToSave.SuikaSkinsImagesPaths[i]);
+            File.Copy(_configWithFullPathToCopyFilesFrom.SuikaSkinsImagesPaths[i], fullSkinPath, true);
+        }
     }
 }
