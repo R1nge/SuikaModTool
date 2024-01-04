@@ -15,7 +15,7 @@ public partial class MainWindow : Window
     private int _suikaCount = 12;
     private GameConfig _configWithFullPathToCopyFilesFrom;
     private GameConfig _configToSave;
-    private string _savePath = null;
+    private string _savePath = string.Empty;
     public ObservableCollection<MyPathData> SuikaSkinsPaths { get; set; }
     public ObservableCollection<MyPathData> SuikaIconsPaths { get; set; }
     public ObservableCollection<MyPathData> SuikaAudioPaths { get; set; }
@@ -46,6 +46,14 @@ public partial class MainWindow : Window
     }
 
     //TODO: load data from already existing mod
+    //TODO: show images instead of images paths
+    //TODO: on click change selected image path
+    
+    
+    //MVVM
+    //Model - data
+    //View - xaml
+    //ViewModel - 
 
     public MainWindow()
     {
@@ -122,7 +130,8 @@ public partial class MainWindow : Window
 
             for (int i = 0; i < dialog.FileNames.Length; i++)
             {
-                SuikaSkinsPaths.Add(new MyPathData($"{SuikaSkinsPaths.Count + 1} " + dialog.FileNames[i]));
+                //SuikaSkinsPaths.Add(new MyPathData($"{SuikaSkinsPaths.Count + 1} " + dialog.FileNames[i]));
+                SuikaSkinsPaths.Add(new MyPathData(dialog.FileNames[i]));
             }
         }
     }

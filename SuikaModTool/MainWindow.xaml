@@ -6,15 +6,19 @@
         xmlns:local="clr-namespace:SuikaModTool"
         mc:Ignorable="d"
         ResizeMode="NoResize"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800"
+        >
 
+    <Window.Resources>
+        <local:ImageConverter x:Key="ImageConverter" />
+    </Window.Resources>
     <Grid VerticalAlignment="Stretch"  HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="4*"/>
+            <RowDefinition Height="4*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
@@ -41,14 +45,22 @@
         <Label Grid.Row="3" Grid.Column="0" Content="Suika Skins Icons"/>
         <Button Grid.Row="3" Grid.Column="1" Click="SelectSuikaSkinsClicked" Content="Select" Width="45" HorizontalAlignment="Left"></Button>
         
-        <ScrollViewer Grid.Row="3" Grid.Column="1" HorizontalScrollBarVisibility="Auto" CanContentScroll="False" Height="30" Margin="45 0 0 0 ">
+        <ScrollViewer Grid.Row="3" Grid.Column="1" HorizontalScrollBarVisibility="Visible" CanContentScroll="False" Margin="45 0 0 0">
             <ItemsControl ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=SuikaSkinsPaths}" ScrollViewer.CanContentScroll="True">
+                
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Path}" TextWrapping="Wrap"/>
+                        <Image Source="{Binding Path, Converter={StaticResource ImageConverter}}" Stretch="Uniform" Width="128"> </Image>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+            
         </ScrollViewer>
         
         <Label Grid.Row="4" Grid.Column="0" Content="Suika Icons"/>
