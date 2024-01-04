@@ -9,6 +9,7 @@ namespace SuikaModTool;
 
 public partial class MainWindow : Window
 {
+    private int _suikaCount = 12;
     private GameConfig _configWithFullPathToCopyFilesFrom = new();
     private GameConfig _configToSave = new();
     private string _savePath = null;
@@ -28,19 +29,23 @@ public partial class MainWindow : Window
 
     private void SelectPreviewImageClicked(object sender, RoutedEventArgs e)
     {
-        var dialog = new OpenFileDialog
-        {
-            FileName = "Preview Image",
-            DefaultExt = ".jpg",
-            Filter = "Image Files(*.jpg;*.jpeg;*.bmp)|*.jpg;*.jpeg;.bmp;"
-        };
-
-        bool? result = dialog.ShowDialog();
-
-        if (result == true)
+        if (OpenImageFileDialog(out var dialog) == true)
         {
             _configWithFullPathToCopyFilesFrom.ModIconPath = dialog.FileName;
             _configToSave.ModIconPath = dialog.SafeFileName;
+            var button = (Button)sender;
+            button.Content = _configWithFullPathToCopyFilesFrom.ModIconPath;
+        }
+    }
+
+    private void SelectContainer(object sender, RoutedEventArgs e)
+    {
+        if (OpenImageFileDialog(out var dialog) == true)
+        {
+            _configWithFullPathToCopyFilesFrom.ContainerImagePath = dialog.FileName;
+            _configToSave.ContainerImagePath = dialog.SafeFileName;
+            var button = (Button)sender;
+            button.Content = _configWithFullPathToCopyFilesFrom.ContainerImagePath;
         }
     }
 
@@ -72,19 +77,73 @@ public partial class MainWindow : Window
 
     private bool Validate()
     {
-        if (string.IsNullOrEmpty(_configToSave.ModName) || string.IsNullOrWhiteSpace(_configToSave.ModName))
+        if (StringIsInvalid(_configToSave.ModName))
         {
             MessageBox.Show("Mod name is empty", "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
             return false;
         }
 
-        if (string.IsNullOrEmpty(_configToSave.ModIconPath) || string.IsNullOrWhiteSpace(_configToSave.ModIconPath))
+        if (StringIsInvalid(_configToSave.ModIconPath))
         {
             MessageBox.Show("Mod icon path is empty", "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
             return false;
         }
 
+        if (StringIsInvalid(_configToSave.ContainerImagePath))
+        {
+            MessageBox.Show("Container image path is empty", "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+            return false;
+        }
+
         return true;
+
+        if (_configToSave.SuikaSkinsImagesPaths.Length != _suikaCount)
+        {
+            MessageBox.Show("Suika skins images paths are empty", "Save error", MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            return false;
+        }
+
+        if (_configToSave.SuikaIconsPaths.Length != _suikaCount)
+        {
+            MessageBox.Show("Suika icons paths are empty", "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+            return false;
+        }
+
+        if (_configToSave.SuikaAudioPaths.Length != _suikaCount)
+        {
+            MessageBox.Show("Suika audio paths are empty", "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+            return false;
+        }
+
+        if (_configToSave.SuikaDropChances.Length != _suikaCount)
+        {
+            MessageBox.Show("Suika drop chances are empty", "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool StringIsInvalid(string str)
+    {
+        return string.IsNullOrEmpty(str) || string.IsNullOrWhiteSpace(str);
+    }
+
+    private bool? OpenImageFileDialog(out OpenFileDialog imageDialog)
+    {
+        var dialog = new OpenFileDialog
+        {
+            FileName = "Preview Image",
+            DefaultExt = ".jpg",
+            Filter = "Image Files(*.jpg;*.jpeg;*.bmp)|*.jpg;*.jpeg;.bmp;"
+        };
+
+        imageDialog = dialog;
+        
+        bool? result = dialog.ShowDialog();
+
+        return result;
     }
 
     private void CreateMod()
@@ -99,15 +158,19 @@ public partial class MainWindow : Window
 
         var fullJsonPath = Path.Combine(fullSavePath, "config.json");
         File.WriteAllText(fullJsonPath, json);
-        
+
         CopyFiles(fullSavePath);
-        
+
         Debug.WriteLine("Mod has been created");
     }
 
     private void CopyFiles(string fullSavePath)
     {
         var fullIconPath = Path.Combine(fullSavePath, _configToSave.ModIconPath);
-        File.Copy(_configWithFullPathToCopyFilesFrom.ModIconPath, fullIconPath);
+        File.Copy(_configWithFullPathToCopyFilesFrom.ModIconPath, fullIconPath, true);
+        
+        
+        var fullContainerPath = Path.Combine(fullSavePath, _configToSave.ContainerImagePath);
+        File.Copy(_configWithFullPathToCopyFilesFrom.ContainerImagePath, fullContainerPath, true);
     }
 }

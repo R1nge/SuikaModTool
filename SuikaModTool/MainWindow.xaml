@@ -11,8 +11,18 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -20,10 +30,13 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         
-        <Label Content="Mod title"/>
+        <Label Grid.Row="0" Grid.Column="0" Content="Mod Title"/>
         <TextBox Grid.Row="0" Grid.Column="1" TextChanged="TitleChanged" Margin="2"/>
-        <Button Grid.Row="1" Grid.Column="1" Click="SelectPreviewImageClicked"/>
-        <Button x:Name="CreateModButton" Content="Create" Grid.Row="2" Grid.ColumnSpan="3" Grid.Column="0" Click="CreateModClicked"/>
+        <Label Grid.Row="1" Grid.Column="0" Content="Preview Icon"/>
+        <Button Grid.Row="1" Grid.Column="1" Click="SelectPreviewImageClicked" Height="25"/>
+        <Label Grid.Row="2" Grid.Column="0" Content="Container Icon"/>
+        <Button Grid.Row="2" Grid.Column="1" Click="SelectContainer" Height="25"/>
+        <Button x:Name="CreateModButton" Content="Create" Grid.Row="12" Grid.ColumnSpan="3" Grid.Column="0" Click="CreateModClicked"/>
       
 
     </Grid>
