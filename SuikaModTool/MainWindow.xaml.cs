@@ -16,7 +16,8 @@ public partial class MainWindow : Window
     private GameConfig _configWithFullPathToCopyFilesFrom;
     private GameConfig _configToSave;
     private string _savePath = null;
-    public ObservableCollection<MyPathData> Paths { get; set; }
+    public ObservableCollection<MyPathData> SuikaSkinsPaths { get; set; }
+    public ObservableCollection<MyPathData> SuikaIconsPaths { get; set; }
 
     public class MyPathData : INotifyPropertyChanged
     {
@@ -49,7 +50,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        Paths = new ObservableCollection<MyPathData>();
+        SuikaSkinsPaths = new ObservableCollection<MyPathData>();
+        SuikaIconsPaths = new ObservableCollection<MyPathData>();
     }
 
     private void TitleChanged(object sender, TextChangedEventArgs args)
@@ -87,7 +89,7 @@ public partial class MainWindow : Window
 
     private void SelectSuikaSkins()
     {
-        if (Paths.Count == _suikaCount)
+        if (SuikaSkinsPaths.Count == _suikaCount)
         {
             MessageBox.Show("Max number of suika skins reached");
             return;
@@ -118,9 +120,52 @@ public partial class MainWindow : Window
 
             for (int i = 0; i < dialog.FileNames.Length; i++)
             {
-                Paths.Add(new MyPathData($"{Paths.Count + 1} " + dialog.FileNames[i]));
+                SuikaSkinsPaths.Add(new MyPathData($"{SuikaSkinsPaths.Count + 1} " + dialog.FileNames[i]));
             }
         }
+    }
+
+    private void SelectSuikaIconsClicked(object sender, RoutedEventArgs e)
+    {
+        SelectSuikaIcons();
+    }
+    
+    private void SelectSuikaIcons()
+    {
+        if (SuikaIconsPaths.Count == _suikaCount)
+        {
+            MessageBox.Show("Max number of suika icons reached");
+            return;
+        }
+
+        if (OpenMultipleFilesDialog(out var dialog) == true)
+        {
+            _configToSave.SuikaIconsPaths = new string[_suikaCount];
+            _configWithFullPathToCopyFilesFrom.SuikaIconsPaths = new string[_suikaCount];
+
+            for (var i = 0; i < dialog.SafeFileNames.Length; i++)
+            {
+                var fileName = dialog.SafeFileNames[i];
+                if (i < _suikaCount)
+                {
+                    _configToSave.SuikaIconsPaths[i] = fileName;
+                }
+            }
+
+            for (int i = 0; i < dialog.FileNames.Length; i++)
+            {
+                var fileName = dialog.FileNames[i];
+                if (i < _suikaCount)
+                {
+                    _configWithFullPathToCopyFilesFrom.SuikaIconsPaths[i] = fileName;
+                }
+            }
+
+            for (int i = 0; i < dialog.FileNames.Length; i++)
+            {
+                SuikaIconsPaths.Add(new MyPathData($"{SuikaIconsPaths.Count + 1} " + dialog.FileNames[i]));
+            }
+        }   
     }
 
     private void CreateModClicked(object sender, RoutedEventArgs e)
@@ -186,8 +231,6 @@ public partial class MainWindow : Window
             return false;
         }
 
-        return true;
-
         if (_configToSave.SuikaSkinsImagesPaths.Length != _suikaCount)
         {
             MessageBox.Show("Suika skins images paths are empty", "Save error", MessageBoxButton.OK,
@@ -195,12 +238,13 @@ public partial class MainWindow : Window
             return false;
         }
 
-
         if (_configToSave.SuikaIconsPaths.Length != _suikaCount)
         {
             MessageBox.Show("Suika icons paths are empty", "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
             return false;
         }
+        
+        return true;
 
         if (_configToSave.SuikaAudioPaths.Length != _suikaCount)
         {
@@ -253,7 +297,7 @@ public partial class MainWindow : Window
 
         CopyFiles(fullSavePath);
 
-        Debug.WriteLine("Mod has been created");
+        MessageBox.Show($"Mod has been created\n {fullSavePath}", "Save success", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void CopyFiles(string fullSavePath)
@@ -268,6 +312,12 @@ public partial class MainWindow : Window
         {
             var fullSkinPath = Path.Combine(fullSavePath, _configToSave.SuikaSkinsImagesPaths[i]);
             File.Copy(_configWithFullPathToCopyFilesFrom.SuikaSkinsImagesPaths[i], fullSkinPath, true);
+        }
+        
+        for (int i = 0; i < _configToSave.SuikaIconsPaths.Length; i++)
+        {
+            var fullSkinPath = Path.Combine(fullSavePath, _configToSave.SuikaIconsPaths[i]);
+            File.Copy(_configWithFullPathToCopyFilesFrom.SuikaIconsPaths[i], fullSkinPath, true);
         }
     }
 }
