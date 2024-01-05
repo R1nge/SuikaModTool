@@ -20,21 +20,17 @@ public partial class MainWindow : Window
     public ObservableCollection<MyPathData> SuikaIconsPaths { get; set; }
     public ObservableCollection<MyPathData> SuikaAudioPaths { get; set; }
 
-    public class MyPathData : INotifyPropertyChanged
+    //TODO: use single variable, instead of collection
+    public ObservableCollection<MyPathData> ModImage { get; set; }
+    public ObservableCollection<MyPathData> ContainerImage { get; set; }
+
+    public sealed class MyPathData : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public MyPathData(string path)
-        {
-            Path = path;
-        }
+        private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        private bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = "")
         {
             if (EqualityComparer<T>.Default.Equals(field, value)) return false;
             field = value;
@@ -42,18 +38,17 @@ public partial class MainWindow : Window
             return true;
         }
 
-        public string Path { get; set; }
+        private string _path;
+
+        public string Path
+        {
+            get => _path;
+            set => SetField(ref _path, value);
+        }
     }
 
     //TODO: load data from already existing mod
-    //TODO: show images instead of images paths
-    //TODO: on click change selected image path
-    
-    
-    //MVVM
-    //Model - data
-    //View - xaml
-    //ViewModel - 
+    //TODO: on image click change selected image path
 
     public MainWindow()
     {
@@ -62,6 +57,8 @@ public partial class MainWindow : Window
         SuikaSkinsPaths = new ObservableCollection<MyPathData>();
         SuikaIconsPaths = new ObservableCollection<MyPathData>();
         SuikaAudioPaths = new ObservableCollection<MyPathData>();
+        ModImage = new ObservableCollection<MyPathData>();
+        ContainerImage = new ObservableCollection<MyPathData>();
     }
 
     private void TitleChanged(object sender, TextChangedEventArgs args)
@@ -76,8 +73,19 @@ public partial class MainWindow : Window
         {
             _configWithFullPathToCopyFilesFrom.ModIconPath = dialog.FileName;
             _configToSave.ModIconPath = dialog.SafeFileName;
-            var button = (Button)sender;
-            button.Content = _configWithFullPathToCopyFilesFrom.ModIconPath;
+            var data = new MyPathData
+            {
+                Path = dialog.FileName
+            };
+            if (ModImage.Count == 1)
+            {
+                ModImage[0] = data;    
+            }
+            else
+            {
+                ModImage.Add(data);
+            }
+            
         }
     }
 
@@ -87,8 +95,18 @@ public partial class MainWindow : Window
         {
             _configWithFullPathToCopyFilesFrom.ContainerImagePath = dialog.FileName;
             _configToSave.ContainerImagePath = dialog.SafeFileName;
-            var button = (Button)sender;
-            button.Content = _configWithFullPathToCopyFilesFrom.ContainerImagePath;
+            var data = new MyPathData
+            {
+                Path = dialog.FileName
+            };
+            if (ContainerImage.Count == 1)
+            {
+                ContainerImage[0] = data;
+            }
+            else
+            {
+                ContainerImage.Add(data);
+            }
         }
     }
 
@@ -131,7 +149,11 @@ public partial class MainWindow : Window
             for (int i = 0; i < dialog.FileNames.Length; i++)
             {
                 //SuikaSkinsPaths.Add(new MyPathData($"{SuikaSkinsPaths.Count + 1} " + dialog.FileNames[i]));
-                SuikaSkinsPaths.Add(new MyPathData(dialog.FileNames[i]));
+                var data = new MyPathData
+                {
+                    Path = dialog.FileNames[i]
+                };
+                SuikaSkinsPaths.Add(data);
             }
         }
     }
@@ -174,7 +196,11 @@ public partial class MainWindow : Window
 
             for (int i = 0; i < dialog.FileNames.Length; i++)
             {
-                SuikaIconsPaths.Add(new MyPathData($"{SuikaIconsPaths.Count + 1} " + dialog.FileNames[i]));
+                var data = new MyPathData
+                {
+                    Path = dialog.FileNames[i]
+                };
+                SuikaIconsPaths.Add(data);
             }
         }
     }
@@ -217,7 +243,11 @@ public partial class MainWindow : Window
 
             for (int i = 0; i < dialog.FileNames.Length; i++)
             {
-                SuikaAudioPaths.Add(new MyPathData($"{SuikaAudioPaths.Count + 1} " + dialog.FileNames[i]));
+                var data = new MyPathData
+                {
+                    Path = $"{SuikaAudioPaths.Count + 1} " + dialog.FileNames[i]
+                };
+                SuikaAudioPaths.Add(data);
             }
         }
     }
